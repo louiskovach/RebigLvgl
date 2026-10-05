@@ -29,7 +29,7 @@ static SemaphoreHandle_t s_lock;
 static plc_snap_t        s_snap;
 
 /* commands from the screens */
-static volatile uint32_t s_pulse_start, s_pulse_stop, s_pulse_revive, s_pulse_reset;
+static volatile uint32_t s_pulse_start, s_pulse_stop, s_pulse_revive, s_pulse_reset, s_pulse_abort;
 static volatile bool     s_manual_pump;
 
 /* presets written into V memory every scan */
@@ -114,6 +114,7 @@ uint32_t plc_link_state_time_ms(uint8_t state)
 /* ------------------------------------------------------------------ commands */
 void plc_link_cmd_start(void)       { s_pulse_start = now_ms() + PULSE_MS; }
 void plc_link_cmd_stop(void)        { s_pulse_stop = now_ms() + PULSE_MS; }
+void plc_link_cmd_abort(void)      { s_pulse_abort = now_ms() + PULSE_MS; }
 void plc_link_cmd_revive(void)      { s_pulse_revive = now_ms() + PULSE_MS; }
 void plc_link_cmd_fault_reset(void) { s_pulse_reset = now_ms() + PULSE_MS; }
 void plc_link_manual_pump(bool on)  { s_manual_pump = on; }
@@ -136,7 +137,7 @@ static void inputs_before_scan(uint32_t real, uint32_t t)
     plc_wr_bit('I', 1, 2, (int32_t)(s_pulse_stop - real) > 0);      /* Stop */
     plc_wr_bit('I', 0, 4, (int32_t)(s_pulse_revive - real) > 0);    /* Bump / Revive */
     plc_wr_bit('I', 1, 0, !((int32_t)(s_pulse_reset - real) > 0));  /* Fault reset: normally 1 */
-    plc_wr_bit('I', 0, 2, 0);                                     /* Immediate stop: not used */
+    plc_wr_bit('I', 0, 2, (int32_t)(s_pulse_abort - real) > 0);     /* Immediate stop (aborts a revive) */
 
     /* SIMULATED pump: the running signal follows the pump output after a short delay */
     bool pump = plc_rd_bit('Q', 0, 0);

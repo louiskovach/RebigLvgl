@@ -84,6 +84,7 @@ static seq_t s_revive   = { .title = "Revive Media Mode", .rows = k_revive_rows,
 /* follower state */
 static plc_snap_t s_snap;
 static uint8_t    s_prev_state = 0xFF;
+static bool       s_revive_aborted;    /* Stop pressed on the Revive screen: skip the "finished" view */
 static uint8_t    s_last_phase;        /* 1 start, 2 stop, 3 revive (for the finishing view) */
 static bool       s_follow;            /* a screen button just started something */
 static bool       s_fast;              /* Diagnostic Filter run */
@@ -272,6 +273,7 @@ static void set_fast(bool fast)
 static void on_state_change(uint8_t prev, uint8_t st)
 {
 
+    if (prev == 0 && st != 0) s_revive_aborted = false;             /* a new run starts */
     if (st >= 1 && st <= 6)   s_last_phase = 1;
     if (st >= 10 && st <= 14) s_last_phase = 2;
     if (st >= 15 && st <= 18) s_last_phase = 3;
@@ -353,13 +355,17 @@ static void follow_tick(lv_timer_t *t)
     lv_obj_t *a = lv_screen_active();
     if (a == s_filter.scr)        seq_draw(&s_filter, st, st == 0 && s_last_phase == 1);
     else if (a == s_stopping.scr) seq_draw(&s_stopping, st, st == 0 && s_last_phase == 2);
-    else if (a == s_revive.scr)   seq_draw(&s_revive, st, st == 0 && s_last_phase == 3);
+    else if (a == s_revive.scr)   seq_draw(&s_revive, st, st == 0 && s_last_phase == 3 && !s_revive_aborted);
 
     update_io();
 }
 
 /* ------------------------------------------------------------------ build */
-static void stop_cb(lv_event_t *e) { (void)e; ui_filter_stop(); }
+static void stop_cb(lv_event_t *e)
+{
+    if (lv_event_get_user_data(e) == &s_revive) ui_revive_stop();   /* the program ignores Stop (I1.2) during bumps */
+    else ui_filter_stop();
+}
 
 static void build_row(seq_t *s, int i)
 {
@@ -421,7 +427,7 @@ static void seq_build(seq_t *s)
     if (s->has_stop) {
         lv_obj_t *stop = ui_make_stop_button(s->scr);
         lv_obj_set_pos(stop, UI_MARGIN, LIST_Y + (LIST_H - 140) / 2);
-        lv_obj_add_event_cb(stop, stop_cb, LV_EVENT_CLICKED, NULL);
+        lv_obj_add_event_cb(stop, stop_cb, LV_EVENT_CLICKED, s);
     }
 
     s->list = lv_obj_create(s->scr);
@@ -498,6 +504,13 @@ void ui_revive_start(void)
     s_follow = true;
     if (st == 0) { seq_reset_view(&s_revive); ui_go(UI_SCR_REVIVE); }
     else if (!ui_screen_is(phase_screen(st))) ui_go(phase_screen(st));
+}
+
+void ui_revive_stop(void)
+{
+    s_revive_aborted = true;
+    s_follow = true;
+    plc_link_cmd_abort();
 }
 
 void ui_filter_stop(void)

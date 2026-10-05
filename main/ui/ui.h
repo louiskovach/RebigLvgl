@@ -180,6 +180,7 @@ void ui_param_edit_open(int param_id);   /* opens the numeric entry screen */
 /* ================= PLC-facing API (call with the LVGL port lock held) ================= */
 void ui_filter_start(void);     /* start (or show, if already running) */
 void ui_revive_start(void);
+void ui_revive_stop(void);      /* aborts the running revive, back to the main page */
 void ui_filter_stop(void);      /* runs the Stopping Filter sequence */
 bool ui_filter_in_mode(void);   /* start-up finished, filter is in Filter Mode */
 void ui_diag_filter_start(void);/* filter start-up with every step = 1 s */

@@ -46,6 +46,7 @@ void     plc_link_get(plc_snap_t *out);         /* latest snapshot (thread-safe)
 /* commands (thread-safe, non-blocking) */
 void     plc_link_cmd_start(void);              /* pulse I0.0 */
 void     plc_link_cmd_stop(void);               /* pulse I1.2 */
+void     plc_link_cmd_abort(void);              /* pulse I0.2: immediate stop, program back to idle */
 void     plc_link_cmd_revive(void);             /* pulse I0.4 */
 void     plc_link_cmd_fault_reset(void);        /* I1.0 high -> low */
 void     plc_link_manual_pump(bool on);         /* V250.0 */
