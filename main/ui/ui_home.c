@@ -79,7 +79,10 @@ lv_obj_t *ui_home_create(void)
     ui_add_nav(info, UI_SCR_IDLE);
 
     lv_obj_t *bell = ui_make_bell_button(scr);
-    lv_obj_align(bell, LV_ALIGN_BOTTOM_RIGHT, -UI_MARGIN - UI_BTN_H - UI_GAP, by);
+    /* same spot as on the Idle (info) screen, where ui_spread_row() spaces 3 x BTN_W + 2 x BTN_H
+     * across the row: the bell must not jump when switching between the two screens */
+    const int32_t idle_gap = (UI_W - 2 * UI_MARGIN - (3 * UI_BTN_W + 2 * UI_BTN_H)) / 4;
+    lv_obj_align(bell, LV_ALIGN_BOTTOM_RIGHT, -UI_MARGIN - UI_BTN_H - idle_gap, by);
 
     ui_make_status_bar(scr);
     return scr;
