@@ -63,7 +63,7 @@ void ui_info_on_enter(void)
     ui_format_datetime(buf, sizeof(buf), s_start_time, true);
     lv_label_set_text(s_val_start, buf);
     lv_label_set_text(s_val_ip, net_link_up() ? net_ip() : (g_settings.dhcp ? "" : g_settings.ip));
-    lv_label_set_text(s_val_link, net_link_up() ? "UP (Wi-Fi)" : "DOWN");
+    lv_label_set_text(s_val_link, net_link_up() ? "Connected" : "Disconnected");
     if (s_model[0] == 'N') lv_label_set_text(s_val_model, ui_model_name());   /* unless the PLC set one */
 }
 
@@ -98,7 +98,7 @@ lv_obj_t *ui_info_create(void)
     snprintf(macs, sizeof(macs), "%02x-%02x-%02x-%02x-%02x-%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     kv(net, "Network", "", 4, 100, UI_FONT_24);
     s_val_ip = kv(net, "IP:", "", 34, 80, UI_FONT_20);
-    s_val_link = kv(net, "Link:", "DOWN", 60, 80, UI_FONT_20);
+    s_val_link = kv(net, "Link:", "Disconnected", 60, 80, UI_FONT_20);
     kv(net, "MAC:",  macs,   86, 80, UI_FONT_20);
 
     /* storage panel */
