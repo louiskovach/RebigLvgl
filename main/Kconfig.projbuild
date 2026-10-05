@@ -1,0 +1,75 @@
+menu "Filter HMI"
+    config HMI_WIFI_SSID
+        string "Wi-Fi SSID (leave empty to disable Wi-Fi)"
+        default ""
+    config HMI_WIFI_PASSWORD
+        string "Wi-Fi password"
+        default ""
+    config HMI_NTP_SERVER
+        string "NTP time server"
+        default "pool.ntp.org"
+endmenu
+
+menu "PLC runtime"
+    config PLC_DEBUG
+        bool "Debugger (serial console: read, write, force, watch, trace)"
+        default y
+        help
+            Serial console for the PLC program, at the same port and baud rate as the
+            log (115200). Type help in the serial monitor for the commands.
+            Turn OFF for production: force and write must not be available on a running
+            machine. When off, the debug lines in program.c compile to nothing.
+endmenu
+
+menu "Modbus master (RS-485)"
+    config MB_ENABLE
+        bool "Start the Modbus RTU master at boot"
+        default y
+    config MB_UART_NUM
+        int "UART number"
+        range 1 2
+        default 1
+    config MB_TX_GPIO
+        int "TX pin (to the transceiver's DI)"
+        default 4
+    config MB_RX_GPIO
+        int "RX pin (from the transceiver's RO)"
+        default 5
+    config MB_DE_GPIO
+        int "Enable pin (DE and /RE), high while sending"
+        default 6
+    config MB_BAUD
+        int "Baud rate"
+        default 9600
+    choice MB_PARITY
+        prompt "Parity"
+        default MB_PARITY_NONE
+        config MB_PARITY_NONE
+            bool "None (8N1 / 8N2)"
+        config MB_PARITY_EVEN
+            bool "Even (8E1, the Modbus standard default)"
+        config MB_PARITY_ODD
+            bool "Odd (8O1)"
+    endchoice
+    config MB_STOP_BITS_2
+        bool "2 stop bits (usual with no parity on strict devices)"
+        default n
+    config MB_TIMEOUT_MS
+        int "Reply timeout (ms)"
+        range 20 5000
+        default 200
+    config MB_RETRIES
+        int "Retries after a timeout or bad reply"
+        range 0 5
+        default 1
+    config MB_BROADCAST_DELAY_MS
+        int "Wait after a broadcast write (ms)"
+        default 100
+    config MB_POLL_CYCLE_MS
+        int "Polling task: pause between passes through mb_map.c (ms)"
+        range 1 10000
+        default 20
+    config MB_STATUS_VBYTE
+        int "Polling task: first V byte of the 'communication OK' bits (4 bytes, 1 bit per line)"
+        default 500
+endmenu

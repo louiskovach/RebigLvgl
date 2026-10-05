@@ -1,0 +1,19 @@
+# ESP-IDF build output and generated config
+build/
+sdkconfig
+sdkconfig.old
+managed_components/
+
+# Local Wi-Fi password (see main/wifi_test_credentials.example.h)
+main/wifi_test_credentials.h
+
+# PC test binaries
+tests/pc/bin/
+
+# IDE
+.vscode/
+.settings/
+.project
+.cproject
+*.launch
+.DS_Store
